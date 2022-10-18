@@ -1,3 +1,3 @@
 import torch
-x = torch.rand(5, 3)
+x = torch.rand(4)
 print(x)
