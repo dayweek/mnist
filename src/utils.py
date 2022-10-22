@@ -1,9 +1,9 @@
 from tqdm import tqdm
 from pathlib import Path
 import requests
-
 import gzip
 import shutil
+from PIL import Image
 
 def download_file(url, dir):
     dest_file = Path(dir) / Path(url).name
@@ -21,6 +21,48 @@ def ungz(filepath_in, filepath_out):
         with open(filepath_out, 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
 
+def read_labels(filepath):
+    with open(filepath, "rb") as f:
+        # skip magic number
+        bytes_read = f.read(4)
+        # skip number of items
+        bytes_read = f.read(4)
+        
+        # read labels one by one
+        bytes_read = f.read(1)
+        labels = {}
+        file_number = 0
+        while bytes_read:
+            label = int.from_bytes(bytes_read, "big")
+            labels[f'test/{file_number}.png'] = label
+            bytes_read = f.read(1)
+            file_number += 1
+        return labels
+
+def create_png_files(filepath, dir):
+    Path(dir).mkdir(exist_ok=True)
+    
+    with open(filepath, "rb") as f:
+        # skip magic number
+        bytes_read = f.read(4)
+        # skip number of items
+        bytes_read = f.read(4)
+        # skip rows
+        bytes_read = f.read(4)
+        # skip columns
+        bytes_read = f.read(4)
+        
+        image_size = 28 * 28
+        
+        # read images one by one
+        bytes_read = f.read(image_size)
+        file_number = 0
+        while bytes_read:
+            image = Image.frombuffer('L', (28, 28), bytes_read)
+            image.save(f'{dir}/{file_number}.png')
+            bytes_read = f.read(image_size)
+            file_number += 1
+    
 def download_mnist(dir):
     download_file("http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz", dir)
     download_file("http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz", dir)
@@ -30,3 +72,5 @@ def download_mnist(dir):
     ungz("data/train-labels-idx1-ubyte.gz", "data/train-labels-idx1-ubyte")
     ungz("data/t10k-images-idx3-ubyte.gz", "data/t10k-images-idx3-ubyte")
     ungz("data/t10k-labels-idx1-ubyte.gz", "data/t10k-labels-idx1-ubyte")
+    create_png_files("data/t10k-images-idx3-ubyte", "data/test")
+    create_png_files("data/train-images-idx3-ubyte", "data/train")
