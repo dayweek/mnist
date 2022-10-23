@@ -1,4 +1,4 @@
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 from pathlib import Path
 import requests
 import gzip
@@ -74,3 +74,4 @@ def download_mnist(dir):
     ungz("data/t10k-labels-idx1-ubyte.gz", "data/t10k-labels-idx1-ubyte")
     create_png_files("data/t10k-images-idx3-ubyte", "data/test")
     create_png_files("data/train-images-idx3-ubyte", "data/train")
+    print("MNIST data downloaded and processed.")
