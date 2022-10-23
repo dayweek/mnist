@@ -1448,7 +1448,9 @@ torchvision==0.13.1 \
     --hash=sha256:e9a563894f9fa40692e24d1aa58c3ef040450017cfed3598ff9637f404f3fe3b \
     --hash=sha256:ef5fe3ec1848123cd0ec74c07658192b3147dcd38e507308c790d5943e87b88c \
     --hash=sha256:f230a1a40ed70d51e463ce43df243ec520902f8725de2502e485efc5eea9d864
-    # via fastai
+    # via
+    #   -r requirements.in
+    #   fastai
 tornado==6.2 \
     --hash=sha256:1d54d13ab8414ed44de07efecb97d4ef7c39f7438cf5e976ccd356bebb1b5fca \
     --hash=sha256:20f638fd8cc85f3cbae3c732326e96addff0a15e22d80f049e00121651e82e72 \

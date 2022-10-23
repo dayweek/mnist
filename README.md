@@ -2,7 +2,7 @@
 
 Setup virtual environment:
 ```
-brew install pyenv
+brew install pyenv xz
 pyenv install
 python -m venv venv
 source venv/bin/activate

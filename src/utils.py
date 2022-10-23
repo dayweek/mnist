@@ -21,7 +21,7 @@ def ungz(filepath_in, filepath_out):
         with open(filepath_out, 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
 
-def read_labels(filepath):
+def read_labels(filepath, dir):
     with open(filepath, "rb") as f:
         # skip magic number
         bytes_read = f.read(4)
@@ -34,7 +34,7 @@ def read_labels(filepath):
         file_number = 0
         while bytes_read:
             label = int.from_bytes(bytes_read, "big")
-            labels[f'test/{file_number}.png'] = label
+            labels[f'{dir}/{file_number}.png'] = label
             bytes_read = f.read(1)
             file_number += 1
         return labels
