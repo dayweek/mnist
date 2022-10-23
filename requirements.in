@@ -3,3 +3,5 @@ torchvision
 pytest
 fastai
 jupyter
+huggingface_hub
+gradio
