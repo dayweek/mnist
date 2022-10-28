@@ -6,14 +6,12 @@ from pathlib import Path
 from IPython.display import display
 from torch.utils.data import DataLoader
 from tqdm.autonotebook import tqdm
-
-from torch import nn
-
 from torchvision import transforms
+
 convert_tensor = transforms.ToTensor()
 image_from_tensor = transforms.ToPILImage()
 
-def train_and_save_model(download=False):
+def train_and_save_model(download=False, save=False):
     def convert(a):
         return 0 if a == 7 else 1
 
@@ -38,40 +36,63 @@ def train_and_save_model(download=False):
 
     dset = list(zip(train_x,train_y))
 
-    weights = torch.randn(28*28).requires_grad_()
-    bias = torch.randn(1).requires_grad_()
-    dataloader = DataLoader(dset, batch_size=40, shuffle=True)
-    lr = 0.04
-    epochs = 15
-
     def mnist_loss(preds, truths):
         s = preds.sigmoid()
         return torch.where(truths == 1, 1 - s, s).mean()
 
-    def accuracy(weights, bias):
-        preds = (test_x @ weights + bias).sigmoid()
+    def model_accuracy(model, dl):
+        preds = model(test_x).sigmoid()
         return ((preds > 0.5) == test_y).float().mean()
+  
+    class Optimizer():
+        def __init__(self, params, lr):
+            for param in params:
+                param.requires_grad_()
+            self.params = params
+            self.lr = lr
+            
+        def zero_grad(self):
+            for param in self.params:
+                param.grad = None
+        
+        def step(self):
+            for param in self.params:
+                param.data -= self.lr * param.grad.data
 
-    def train_epoch(dl, weights, bias, pbar):
+    def train_epoch(model, dl, opt, loss_f):
         for _, batch in enumerate(dl):
             x, y = batch
-            preds = x @ weights + bias
-            loss = mnist_loss(preds, y)
+            preds = model(x)
+            loss = loss_f(preds, y)
             loss.backward()
-            weights.data -= lr * weights.grad.data
-            bias.data -= lr * bias.grad.data
-            weights.grad.zero_()
-            bias.grad.zero_()
-        print(loss)
+            opt.step()
+            opt.zero_grad()
+        return loss
+                
+                
+    def train(model, dl, opt, epochs, loss_f):
+        print(f'accuracy before {model_accuracy(model, dl):.4f}')
+        with tqdm(total=epochs, unit='e') as pbar:
+            for epoch in range(epochs):
+                loss = train_epoch(model, dl, opt, loss_f)
+                print(f'loss {loss}')
+                pbar.update(1)
+        print(f'accuracy after {model_accuracy(model, dl):.4f}')
+
+
+    dl = DataLoader(dset, batch_size=40, shuffle=True)
+
+    def linear_model(x):
+        return x @ weights + bias
     
-    print(f'accuracy before {accuracy(weights, bias):.4f}')
+    weights = torch.randn(28*28)
+    bias = torch.randn(1)
+    
+    opt = Optimizer([weights, bias], 0.1)
+    train(linear_model, dl, opt, 10, mnist_loss)
 
-    with tqdm(total=epochs, unit='e') as pbar:
-        for i in range(epochs):
-            train_epoch(dataloader, weights, bias, pbar)
-            pbar.update(1)
+    if save:
+        model = {"weights": weights, "bias":bias}
+        torch.save(model, 'linear_model.pt')
 
-    print(f'accuracy after {accuracy(weights, bias):.4f}')
-
-    model = {"weights": weights, "bias":bias}
-    torch.save(model, 'linear_model.pt')
+train_and_save_model(download=False, save=False)
