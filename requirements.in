@@ -5,3 +5,4 @@ fastai
 jupyter
 huggingface_hub
 gradio
+python-dotenv
