@@ -3,7 +3,7 @@ from IPython.display import display
 from torch.utils.data import DataLoader
 
 from train import Optimizer, train
-from models import LinearModel
+from models import Linear
 from data import load_train_dataset, load_test_dataset
 from torch import nn
 
@@ -25,7 +25,7 @@ def train_mnist_model(save=False):
     dl = DataLoader(load_train_dataset(), batch_size=batch_size, shuffle=True)
     test_dataset = load_test_dataset()
     
-    model = LinearModel(28*28, 1)
+    model = Linear()
     opt = Optimizer(model.parameters(), lr)
 
     train(model, dl, test_dataset, opt, epochs, mnist_loss, model_accuracy)
