@@ -5,28 +5,30 @@ from torch.utils.data import DataLoader
 from train import Optimizer, train
 from models import LinearModel
 from data import load_train_dataset, load_test_dataset
+from torch import nn
 
-def train_mnist_model(model, save=False):
-    def mnist_loss(preds, truths):
-        s = preds.sigmoid()
-        return torch.where(truths == 1, 1 - s, s).mean()
+def mnist_loss(preds, truths):
+    s = preds.sigmoid().flatten()
 
-    def model_accuracy(model, test_dataset):
-        test_x, test_y = test_dataset
-        preds = model(test_x).sigmoid()
-        return ((preds > 0.5) == test_y).float().mean()
+    return torch.where(truths == 1, 1 - s, s).mean()
 
+def model_accuracy(model, test_dataset):
+    test_x, test_y = test_dataset.x, test_dataset.y
+    preds = model(test_x).sigmoid().flatten()
+    return ((preds > 0.5) == test_y).float().mean()
+
+def train_mnist_model(save=False):
+    epochs = 10
+    lr = 0.1
+    batch_size = 40
+
+    dl = DataLoader(load_train_dataset(), batch_size=batch_size, shuffle=True)
     test_dataset = load_test_dataset()
-    dl = DataLoader(load_train_dataset(), batch_size=40, shuffle=True)
     
-    weights = torch.randn(28*28)
-    bias = torch.randn(1)
-    model = LinearModel(weights, bias)
-    opt = Optimizer(model.params, 0.1)
+    model = LinearModel(28*28, 1)
+    opt = Optimizer(model.parameters(), lr)
 
-    print(f'accuracy before {model_accuracy(model, test_dataset):.4f}')
-    train(model, dl, opt, 10, mnist_loss)
-    print(f'accuracy after {model_accuracy(model, test_dataset):.4f}')
+    train(model, dl, test_dataset, opt, epochs, mnist_loss, model_accuracy)
 
     if save:
         torch.save(model.params, 'mnist_model.pt')

@@ -1,8 +1,8 @@
 import pytest
 from pathlib import Path
 
-from utils import download_file
-from utils import download_mnist
+from data import download_file
+from data import download_mnist
 
 def test_download_file():
     download_file("https://raw.githubusercontent.com/dayweek/czech_names_vocative/master/README.md", "data")

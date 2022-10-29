@@ -1,3 +1,4 @@
+from tkinter import Y
 from tqdm.autonotebook import tqdm
 from pathlib import Path
 import requests
@@ -7,8 +8,18 @@ from PIL import Image
 import torch
 from torch import tensor
 from torchvision import transforms
-
 convert_tensor = transforms.ToTensor()
+
+class BaseDataset(torch.utils.data.Dataset):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
+
+    def __len__(self):
+        return len(self.x)
 
 def download_file(url, dir):
     dest_file = Path(dir) / Path(url).name
@@ -96,7 +107,7 @@ def load_test_dataset():
     test_y = tensor([test_labels[key] for key in test_keys if test_labels[key] in [3,7]]).squeeze()
     test_y = tensor([ convert(i) for i in test_y])
 
-    return test_x, test_y
+    return BaseDataset(test_x, test_y)
 
 def load_train_dataset():
     if not Path("data/train-labels-idx1-ubyte").exists():
@@ -113,4 +124,4 @@ def load_train_dataset():
     train_y = tensor([train_labels[key] for key in keys if train_labels[key] in [3,7]]).squeeze()
     train_y = tensor([ convert(i) for i in train_y])
 
-    return list(zip(train_x, train_y)) 
+    return BaseDataset(train_x, train_y)
