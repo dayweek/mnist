@@ -24,7 +24,7 @@ def train_mnist_model(save=False):
 
     dl = DataLoader(load_train_dataset(), batch_size=batch_size, shuffle=True)
     test_dataset = load_test_dataset()
-    
+
     model = Linear()
     opt = Optimizer(model.parameters(), lr)
 

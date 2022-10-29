@@ -38,7 +38,8 @@ def setup_parser():
     temp_args, _ = parser.parse_known_args()
     model_class = import_class(temp_args.model_class)
     model_group = parser.add_argument_group("Model Args")
-    model_class.add_to_argparse(model_group)
+    if "add_to_argparse" in dir(model_class):
+        model_class.add_to_argparse(model_group)
     return parser
 
 def main():

@@ -103,7 +103,7 @@ def load_test_dataset():
     test_keys = list(test_labels)
 
     test_x = torch.stack([convert_tensor(Image.open(Path("data") / key)) for key in test_keys if test_labels[key] in [3, 7]]).squeeze()
-    test_x = test_x.view(-1, 28*28)
+    test_x = test_x.view(-1, 1, 28, 28)
     test_y = tensor([test_labels[key] for key in test_keys if test_labels[key] in [3,7]]).squeeze()
     test_y = tensor([ convert(i) for i in test_y])
 
@@ -120,7 +120,7 @@ def load_train_dataset():
     keys = list(train_labels)
 
     train_x = torch.stack([convert_tensor(Image.open(Path("data") / key)) for key in keys if train_labels[key] in [3, 7]]).squeeze()
-    train_x = train_x.view(-1, 28*28)
+    train_x = train_x.view(-1, 1, 28, 28)
     train_y = tensor([train_labels[key] for key in keys if train_labels[key] in [3,7]]).squeeze()
     train_y = tensor([ convert(i) for i in train_y])
 

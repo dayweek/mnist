@@ -24,10 +24,13 @@ def train_epoch(model, dl, opt, loss_f):
     return loss
       
 def train(model, dl, val_dataset, opt, epochs, loss_f, metric_f):
+    model.eval()
     print(f'Accuracy before {metric_f(model, val_dataset):.4f}')
+    model.train()
     with tqdm(total=epochs, unit='e') as pbar:
         for _ in range(epochs):
             loss = train_epoch(model, dl, opt, loss_f)
             print(f'loss {loss}')
             pbar.update(1)
+    model.eval()
     print(f'Accuracy after {metric_f(model, val_dataset):.4f}')
