@@ -2,25 +2,10 @@ import argparse
 import importlib
 import torch
 
-from pytorch_lightning import seed_everything
+from data_modules.mnist import MNISTDataModule
 
-seed_everything(42, workers=True)
-
-from torch.utils.data import DataLoader
-
-from src.train import Optimizer, train
-from src.data import load_train_dataset, load_test_dataset
+from src.train import Optimizer, train, mnist_loss, model_accuracy
 import torch.nn.functional as F
-
-def mnist_loss(logits, truths):
-    return F.cross_entropy(logits, truths)
-
-def model_accuracy(model, x, y):
-    model.eval()
-    logits = model(x)
-    model.train()
-    preds = torch.argmax(logits, dim=1)
-    return (preds == y).float().mean()
 
 def import_class(class_name: str) -> type:
     """Import class from a module, e.g. 'text_recognizer.models.MLP'."""
@@ -34,7 +19,7 @@ def setup_parser():
     parser = argparse.ArgumentParser()
 
     # Train Args
-    parser.add_argument('--epochs', default=10, type=int)
+    parser.add_argument('--epochs', default=2, type=int)
     parser.add_argument('--lr', default=0.1, type=float)
     parser.add_argument('--optimizer', default='Optimizer', type=str)
     parser.add_argument('--model_class', default='Linear')
@@ -60,14 +45,17 @@ def main():
         opt_class = Optimizer
     else:
         opt_class = getattr(torch.optim, args.optimizer)
-    
-    train_dataset = load_train_dataset()
-    test_dataset = load_test_dataset()
-    dl = DataLoader(train_dataset, batch_size=40, shuffle=True)
+
+    module = MNISTDataModule('data')
+    module.prepare_data()
+    module.setup()
+
+    dl = module.train_dataloader()
+    val_dl = module.val_dataloader()
     
     opt = opt_class(model.parameters(), lr)
 
-    train(model, dl, test_dataset, opt, epochs, mnist_loss, model_accuracy)
+    train(model, dl, val_dl, opt, epochs, mnist_loss, model_accuracy)
 
 if __name__ == "__main__":
     main()
