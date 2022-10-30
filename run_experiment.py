@@ -57,5 +57,7 @@ def main():
 
     train(model, dl, val_dl, opt, epochs, mnist_loss, model_accuracy)
 
+    torch.save(model.state_dict(), "model.pt")
+
 if __name__ == "__main__":
     main()
