@@ -6,4 +6,3 @@ jupyter
 huggingface_hub
 gradio
 python-dotenv
-pytorch-lightning

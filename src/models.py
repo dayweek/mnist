@@ -80,3 +80,24 @@ class SimpleLenet(nn.Module):
         xx = xx.flatten(1)
         xx = F.relu(self.fc1(xx))
         return self.fc2(xx)
+
+class Lenet(nn.Module):
+    def __init__(self, args=None):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 6, 5, padding=2) # -> 6 channels, 28x28
+        self.pool1 = nn.MaxPool2d(2) # -> 6 channels, 14x14
+        self.conv2 = nn.Conv2d(6, 16, 5) #-> 16 images, 10x10
+        self.pool2 = nn.MaxPool2d(2) # -> 16 channels,  5x5
+        self.conv3 = nn.Conv2d(16, 120, 5) #-> 16 images, 1x1
+        self.fc1 = nn.Linear(120, 84)
+        self.fc2 = nn.Linear(84, 10)
+
+    def __call__(self, x):
+        xx = F.relu(self.conv1(x))
+        xx = F.relu(self.pool1(xx))
+        xx = F.relu(self.conv2(xx))
+        xx = F.relu(self.pool2(xx))
+        xx = F.relu(self.conv3(xx))
+        xx = xx.flatten(1)
+        xx = F.relu(self.fc1(xx))
+        return self.fc2(xx)
