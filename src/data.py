@@ -96,16 +96,11 @@ def load_test_dataset():
     if not Path("data/t10k-labels-idx1-ubyte").exists():
         download_mnist("data")
 
-    def convert(a):
-        return 0 if a == 7 else 1
-
     test_labels = read_labels('data/t10k-labels-idx1-ubyte', 'test')
     test_keys = list(test_labels)
 
-    test_x = torch.stack([convert_tensor(Image.open(Path("data") / key)) for key in test_keys if test_labels[key] in [3, 7]]).squeeze()
-    test_x = test_x.view(-1, 1, 28, 28)
-    test_y = tensor([test_labels[key] for key in test_keys if test_labels[key] in [3,7]]).squeeze()
-    test_y = tensor([ convert(i) for i in test_y])
+    test_x = torch.stack([convert_tensor(Image.open(Path("data") / key)) for key in test_keys])
+    test_y = tensor([test_labels[key] for key in test_keys])
 
     return BaseDataset(test_x, test_y)
 
@@ -113,15 +108,10 @@ def load_train_dataset():
     if not Path("data/train-labels-idx1-ubyte").exists():
         download_mnist("data")
 
-    def convert(a):
-        return 0 if a == 7 else 1
-
     train_labels = read_labels('data/train-labels-idx1-ubyte', 'train')
     keys = list(train_labels)
 
-    train_x = torch.stack([convert_tensor(Image.open(Path("data") / key)) for key in keys if train_labels[key] in [3, 7]]).squeeze()
-    train_x = train_x.view(-1, 1, 28, 28)
-    train_y = tensor([train_labels[key] for key in keys if train_labels[key] in [3,7]]).squeeze()
-    train_y = tensor([ convert(i) for i in train_y])
+    train_x = torch.stack([convert_tensor(Image.open(Path("data") / key)) for key in keys])
+    train_y = tensor([train_labels[key] for key in keys])
 
     return BaseDataset(train_x, train_y)

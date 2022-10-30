@@ -2,20 +2,25 @@ import argparse
 import importlib
 import torch
 
+from pytorch_lightning import seed_everything
+
+seed_everything(42, workers=True)
+
 from torch.utils.data import DataLoader
 
 from src.train import Optimizer, train
 from src.data import load_train_dataset, load_test_dataset
+import torch.nn.functional as F
 
-def mnist_loss(preds, truths):
-    s = preds.sigmoid().flatten()
+def mnist_loss(logits, truths):
+    return F.cross_entropy(logits, truths)
 
-    return torch.where(truths == 1, 1 - s, s).mean()
-
-def model_accuracy(model, test_dataset):
-    test_x, test_y = test_dataset.x, test_dataset.y
-    preds = model(test_x).sigmoid().flatten()
-    return ((preds > 0.5) == test_y).float().mean()
+def model_accuracy(model, x, y):
+    model.eval()
+    logits = model(x)
+    model.train()
+    preds = torch.argmax(logits, dim=1)
+    return (preds == y).float().mean()
 
 def import_class(class_name: str) -> type:
     """Import class from a module, e.g. 'text_recognizer.models.MLP'."""
